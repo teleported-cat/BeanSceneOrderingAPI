@@ -31,5 +31,17 @@ namespace BeanSceneOrderingAPI.Controllers
             var item = collection.First(i => i.Id == id);
             return item == null ? NotFound() : Ok(item);
         }
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Item item)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await client.GetDatabase(databaseName).GetCollection<Item>("Items").InsertOneAsync(item);
+
+            return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
+        }
     }
 }
