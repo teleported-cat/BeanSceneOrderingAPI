@@ -24,5 +24,12 @@ namespace BeanSceneOrderingAPI.Controllers
             var collection = client.GetDatabase(databaseName).GetCollection<Item>("Items").AsQueryable();
             return collection == null ? NotFound() : Ok(collection);
         }
+        [HttpGet("{id}")]
+        public IActionResult Get(string id)
+        {
+            var collection = client.GetDatabase(databaseName).GetCollection<Item>("Items").AsQueryable();
+            var item = collection.First(i => i.Id == id);
+            return item == null ? NotFound() : Ok(item);
+        }
     }
 }
