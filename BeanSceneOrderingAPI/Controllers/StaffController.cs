@@ -1,0 +1,121 @@
+﻿using BeanSceneOrderingAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
+using MongoDB.Driver;
+
+namespace BeanSceneOrderingAPI.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class StaffController : ControllerBase
+    {
+        MongoClient client;
+        string databaseName;
+
+        public StaffController(IOptions<BeanSceneDatabaseSettings> databaseSettings)
+        {
+            databaseName = databaseSettings.Value.DatabaseName;
+            client = new MongoClient(databaseSettings.Value.ConnectionString);
+        }
+
+        /// <summary>
+        /// HTTP GET method which returns all staff members in the database.
+        /// </summary>
+        /// <returns>Ok(collection) or NotFound()</returns>
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var collection = client.GetDatabase(databaseName).GetCollection<Staff>("Staff").AsQueryable();
+            return collection == null ? NotFound() : Ok(collection);
+        }
+
+        /// <summary>
+        /// HTTP POST method which inserts a new staff member.
+        /// </summary>
+        /// <param name="item">Staff member to be inserted.</param>
+        /// <returns>CreatedAtAction() or BadRequest()</returns>
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Staff staff)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await client.GetDatabase(databaseName).GetCollection<Staff>("Staff").InsertOneAsync(staff);
+
+            return CreatedAtAction(nameof(Get), new { id = staff.Id }, staff);
+        }
+
+        /// <summary>
+        /// HTTP PUT method which updates an existing staff member.
+        /// </summary>
+        /// <param name="item">Staff member to be updated. The id must match one in the collection.</param>
+        /// <returns>NotFound(), Ok() or StatusCode(500)</returns>
+        [HttpPut]
+        public async Task<IActionResult> Put(Staff staff)
+        {
+            try
+            {
+                var filter = Builders<Staff>.Filter.Eq("_id", ObjectId.Parse(staff.Id));
+
+                if (filter == null)
+                {
+                    return NotFound(0);
+                }
+
+                var update = Builders<Staff>.Update
+                    .Set("firstname", staff.FirstName)
+                    .Set("lastname", staff.LastName)
+                    .Set("username", staff.Username)
+                    .Set("email", staff.Email)
+                    .Set("passwordhash", staff.PasswordHash)
+                    .Set("role", staff.Role)
+                    ;
+
+                var result = await client.GetDatabase(databaseName)
+                    .GetCollection<Staff>("Staff")
+                    .UpdateOneAsync(filter, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    return NotFound("Staff not found");
+                }
+
+                if (result.ModifiedCount == 0)
+                {
+                    return Ok("Staff found but no changes were made");
+                }
+
+                return Ok("Staff updated");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"Error updating staff: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// HTTP method which deletes a staff member from the collection.
+        /// </summary>
+        /// <param name="id">The id of the staff member to be deleted.</param>
+        /// <returns>Ok() or NotFound()</returns>
+        [HttpDelete]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var filter = Builders<Staff>.Filter.Eq("_id", ObjectId.Parse(id));
+
+            if (filter == null)
+            {
+                return NotFound(0);
+            }
+
+            var result = await client.GetDatabase(databaseName)
+                .GetCollection<Staff>("Staff")
+                .DeleteOneAsync(filter);
+
+            return Ok("Staff deleted");
+        }
+    }
+}
