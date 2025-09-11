@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
 
 namespace BeanSceneOrderingAPI.Models
 {
@@ -6,7 +7,9 @@ namespace BeanSceneOrderingAPI.Models
     {
         [BsonId] // Primary Key
         [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)] // Pass the object id as string
-        public string? _id { get; set; }
-        public string name { get; set; }
+        [JsonPropertyName("_id")]
+        public string? Id { get; set; }
+        [BsonElement("name")]
+        public string Name { get; set; }
     }
 }
