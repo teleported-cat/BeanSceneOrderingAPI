@@ -85,5 +85,21 @@ namespace BeanSceneOrderingAPI.Controllers
                 return StatusCode(500, $"Error updating item: {e.Message}");
             }
         }
+        [HttpDelete]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var filter = Builders<Item>.Filter.Eq("_id", ObjectId.Parse(id));
+
+            if (filter == null)
+            {
+                return NotFound(0);
+            }
+
+            var result = await client.GetDatabase(databaseName)
+                .GetCollection<Item>("Items")
+                .DeleteOneAsync(filter);
+
+            return Ok("Item deleted");
+        }
     }
 }
