@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
 
 namespace BeanSceneOrderingAPI.Models
 {
@@ -6,13 +7,14 @@ namespace BeanSceneOrderingAPI.Models
     {
         [BsonId] // Primary Key
         [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)] // Pass the object id as string
+        [JsonPropertyName("_id")]
         public string? Id { get; set; }
         [BsonElement("name")]
         public string Name { get; set; }
         [BsonElement("description")]
         public string Description { get; set; }
         [BsonElement("imagepath")]
-        public string? ImagePath { get; set; }
+        public string? ImagePath { get; set; } = "";
         [BsonElement("price")]
         public decimal Price { get; set; }
         [BsonElement("available")]
@@ -20,9 +22,9 @@ namespace BeanSceneOrderingAPI.Models
         [BsonElement("glutenfree")]
         public bool? GlutenFree { get; set; } = false;
         [BsonElement("diettype")]
-        public string? DietType { get; set; }
+        public string? DietType { get; set; } = "neither";
         [BsonElement("allergens")]
-        public string? Allergens { get; set; }
+        public string? Allergens { get; set; } = "";
         [BsonElement("categoryname")]
         public string CategoryName { get; set; }
 
