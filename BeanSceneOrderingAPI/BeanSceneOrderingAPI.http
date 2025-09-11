@@ -1,0 +1,6 @@
+@BeanSceneOrderingAPI_HostAddress = http://localhost:27017
+
+GET {{BeanSceneOrderingAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
