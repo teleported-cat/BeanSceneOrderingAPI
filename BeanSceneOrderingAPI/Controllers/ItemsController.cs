@@ -27,7 +27,9 @@ namespace BeanSceneOrderingAPI.Controllers
         public IActionResult Get()
         {
             var collection = client.GetDatabase(databaseName).GetCollection<Item>("Items").AsQueryable();
-            return collection == null ? NotFound() : Ok(collection);
+            if (collection == null) { return NotFound(); }
+            var ordered = collection.OrderBy(i => i.CategoryName).ThenBy(i => i.Name);
+            return Ok(ordered);
         }
 
         /// <summary>
