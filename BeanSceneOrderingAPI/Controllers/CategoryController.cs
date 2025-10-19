@@ -95,7 +95,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="id">The id of the category to be deleted.</param>
         /// <returns>Ok() or NotFound()</returns>
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var filter = Builders<Category>.Filter.Eq("_id", ObjectId.Parse(id));
