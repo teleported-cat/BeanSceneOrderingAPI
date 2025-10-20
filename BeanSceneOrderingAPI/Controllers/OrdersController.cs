@@ -1,6 +1,7 @@
 ﻿using BeanSceneOrderingAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace BeanSceneOrderingAPI.Controllers
@@ -25,36 +26,40 @@ namespace BeanSceneOrderingAPI.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var orders = client
-                .GetDatabase(databaseName)
-                .GetCollection<Order>("Orders")
-                .AsQueryable()
-                .ToList();
+            //var orders = client
+            //    .GetDatabase(databaseName)
+            //    .GetCollection<Order>("Orders")
+            //    .AsQueryable()
+            //    .ToList();
 
-            var allItemIds = orders
-                .SelectMany(o => o.ItemData.Select(item => item.ItemId))
-                .Distinct()
-                .ToList();
+            //var allItemIds = orders
+            //    .SelectMany(o => o.ItemData.Select(item => item.ItemId))
+            //    .Distinct()
+            //    .ToList();
 
-            var items = client
-                .GetDatabase(databaseName)
-                .GetCollection<Item>("Items")
-                .Find(i => allItemIds.Contains(i.Id))
-                .ToList();
+            //var items = client
+            //    .GetDatabase(databaseName)
+            //    .GetCollection<Item>("Items")
+            //    .Find(i => allItemIds.Contains(i.Id))
+            //    .ToList();
 
-            var itemLookup = items.ToDictionary(i => i.Id);
+            //var itemLookup = items.ToDictionary(i => i.Id);
 
-            foreach (var order in orders)
-            {
-                order.Items = order.ItemData.Select(itemData => new OrderItem
-                {
-                    Item = itemLookup.TryGetValue(itemData.ItemId, out var item) ? item : null,
-                    Quantity = itemData.Quantity
-                }).Where(oi => oi.Item != null) // Filter out items that weren't found
-                .ToList();
-            }
+            //foreach (var order in orders)
+            //{
+            //    order.Items = order.ItemData.Select(itemData => new OrderItem
+            //    {
+            //        Item = itemLookup.TryGetValue(itemData.ItemId, out var item) ? item : null,
+            //        Quantity = itemData.Quantity
+            //    }).Where(oi => oi.Item != null) // Filter out items that weren't found
+            //    .ToList();
+            //}
 
-            return Ok(orders);
+            //return Ok(orders);
+            var orders = client.GetDatabase(databaseName).GetCollection<Order>("Orders").AsQueryable();
+            if (orders == null) { return NotFound(); };
+            var ordered = orders.OrderBy(o => o.DateTime);
+            return Ok(ordered);
         }
 
         /// <summary>
@@ -65,34 +70,35 @@ namespace BeanSceneOrderingAPI.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(string id)
         {
-            var order = client.GetDatabase(databaseName)
-                .GetCollection<Order>("Orders")
-                .Find(o => o.Id == id)
-                .FirstOrDefault();
+            //var order = client.GetDatabase(databaseName)
+            //    .GetCollection<Order>("Orders")
+            //    .Find(o => o.Id == id)
+            //    .FirstOrDefault();
 
-            if (order == null)
-            {
-                return NotFound("Order not found");
-            }
+            //if (order == null)
+            //{
+            //    return NotFound("Order not found");
+            //}
 
-            var itemIds = order.ItemData.Select(oi => oi.ItemId).ToList();
+            //var itemIds = order.ItemData.Select(oi => oi.ItemId).ToList();
 
-            var items = client.GetDatabase(databaseName)
-                .GetCollection<Item>("Items")
-                .Find(i => itemIds.Contains(i.Id))
-                .ToList();
+            //var items = client.GetDatabase(databaseName)
+            //    .GetCollection<Item>("Items")
+            //    .Find(i => itemIds.Contains(i.Id))
+            //    .ToList();
 
-            var itemLookup = items.ToDictionary(i => i.Id);
+            //var itemLookup = items.ToDictionary(i => i.Id);
 
-            order.Items = order.ItemData.Select(itemData => new OrderItem
-            {
-                Item = itemLookup.TryGetValue(itemData.ItemId, out var item) ? item : null,
-                Quantity = itemData.Quantity
-            })
-            .Where(oi => oi.Item != null)
-            .ToList();
+            //order.Items = order.ItemData.Select(itemData => new OrderItem
+            //{
+            //    Item = itemLookup.TryGetValue(itemData.ItemId, out var item) ? item : null,
+            //    Quantity = itemData.Quantity
+            //})
+            //.Where(oi => oi.Item != null)
+            //.ToList();
 
-            return Ok(order);
+            //return Ok(order);
+            return BadRequest();
         }
 
         [HttpPost]
@@ -108,6 +114,55 @@ namespace BeanSceneOrderingAPI.Controllers
                 .InsertOneAsync(order);
 
             return CreatedAtAction(nameof(Get), new { id = order.Id }, order);
+        }
+
+        [HttpPut("{id}/Status")]
+        public async Task<IActionResult> Put(string id, [FromBody] string newStatus)
+        {
+            try 
+            { 
+                var filter = Builders<Order>.Filter.Eq("_id", ObjectId.Parse(id));
+
+                if (filter == null)
+                {
+                    return NotFound(0);
+                }
+
+                var update = Builders<Order>.Update.Set("status", newStatus);
+
+                var result = await client.GetDatabase(databaseName)
+                    .GetCollection<Order>("Orders")
+                    .UpdateOneAsync(filter, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    return NotFound("Order not found");
+                }
+
+                if (result.ModifiedCount == 0)
+                {
+                    return Ok("Order found but no changes were made");
+                }
+
+                return Ok("Order updated");
+            } catch (Exception e)
+            {
+                return StatusCode(500, $"Error updating order: {e.Message}");
+            }
+        }
+
+        [HttpGet("{id}/Items")]
+        public IActionResult GetItems(string id)
+        {
+            // Get order
+            var collection = client.GetDatabase(databaseName).GetCollection<Order>("Orders").AsQueryable();
+            var order = collection.First(o => o.Id == id);
+            if (order == null) { return NotFound(); }
+            
+            // Get order items
+            // TODO: complete this method
+
+            return Ok();
         }
     }
 }

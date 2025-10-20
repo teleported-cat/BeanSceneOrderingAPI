@@ -12,11 +12,6 @@ namespace BeanSceneOrderingAPI.Models
         [BsonElement("quantity")]
         public int Quantity { get; set; }
     }
-    public class OrderItem
-    {
-        public Item Item { get; set; }
-        public int Quantity { get; set; }
-    }
     public class Order
     {
         [BsonId] // Primary Key
@@ -34,10 +29,6 @@ namespace BeanSceneOrderingAPI.Models
         [BsonElement("notes")]
         public string? Notes { get; set; } = "";
         [BsonElement("itemids")]
-        [JsonIgnore]
         public List<OrderItemData> ItemData { get; set; } = new List<OrderItemData>();
-        [BsonIgnore]
-        [JsonPropertyName("items")]
-        public List<OrderItem> Items { get; set; } = new List<OrderItem>();
     }
 }
