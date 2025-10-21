@@ -152,17 +152,42 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         [HttpGet("{id}/Items")]
-        public IActionResult GetItems(string id)
+        public async Task<IActionResult> GetItems(string id)
         {
             // Get order
-            var collection = client.GetDatabase(databaseName).GetCollection<Order>("Orders").AsQueryable();
-            var order = collection.First(o => o.Id == id);
+            var orders = client.GetDatabase(databaseName).GetCollection<Order>("Orders");
+            var order = await orders.Find(o => o.Id == id).FirstOrDefaultAsync();
             if (order == null) { return NotFound(); }
-            
-            // Get order items
-            // TODO: complete this method
 
-            return Ok();
+            // Get items
+            var itemCollection = client.GetDatabase(databaseName).GetCollection<BsonDocument>("Items");
+            var itemsInOrder = new List<object>();
+
+            // Check if each item in order is in collection
+            foreach (var oid in order.ItemData)
+            {
+                var filter = Builders<BsonDocument>.Filter.Eq("_id", ObjectId.Parse(oid.ItemId));
+                var current = await itemCollection.Find(filter).FirstOrDefaultAsync();
+
+                if (current != null)
+                {
+                    current["quantity"] = oid.Quantity;
+                    var json = current.ToJson();
+                    itemsInOrder.Add(System.Text.Json.JsonSerializer.Deserialize<object>(json));
+                } else
+                {
+                    var invalidItem = new
+                    {
+                        invalid = true,
+                        _id = oid.ItemId,
+                        quantity = oid.Quantity
+                    };
+
+                    itemsInOrder.Add(invalidItem);
+                }
+            }
+
+            return Ok(itemsInOrder);
         }
     }
 }
