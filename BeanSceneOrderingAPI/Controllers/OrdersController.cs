@@ -58,7 +58,7 @@ namespace BeanSceneOrderingAPI.Controllers
             //return Ok(orders);
             var orders = client.GetDatabase(databaseName).GetCollection<Order>("Orders").AsQueryable();
             if (orders == null) { return NotFound(); };
-            var ordered = orders.OrderBy(o => o.DateTime);
+            var ordered = orders.OrderByDescending(o => o.DateTime);
             return Ok(ordered);
         }
 
@@ -163,6 +163,8 @@ namespace BeanSceneOrderingAPI.Controllers
             var itemCollection = client.GetDatabase(databaseName).GetCollection<BsonDocument>("Items");
             var itemsInOrder = new List<object>();
 
+            var jsonSettings = new MongoDB.Bson.IO.JsonWriterSettings { OutputMode = MongoDB.Bson.IO.JsonOutputMode.RelaxedExtendedJson };
+
             // Check if each item in order is in collection
             foreach (var oid in order.ItemData)
             {
@@ -172,7 +174,15 @@ namespace BeanSceneOrderingAPI.Controllers
                 if (current != null)
                 {
                     current["quantity"] = oid.Quantity;
-                    var json = current.ToJson();
+                    if (current["_id"].IsObjectId)
+                    {
+                        current["_id"] = current["_id"].AsObjectId.ToString();
+                    }
+                    if (current["price"].IsDecimal128)
+                    {
+                        current["price"] = current["price"].AsDecimal128.ToString();
+                    }
+                    var json = current.ToJson(jsonSettings);
                     itemsInOrder.Add(System.Text.Json.JsonSerializer.Deserialize<object>(json));
                 } else
                 {
