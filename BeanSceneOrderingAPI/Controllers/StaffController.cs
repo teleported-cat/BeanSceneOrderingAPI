@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using BCrypt.Net;
 
 namespace BeanSceneOrderingAPI.Controllers
 {
@@ -29,7 +30,18 @@ namespace BeanSceneOrderingAPI.Controllers
             var collection = client.GetDatabase(databaseName).GetCollection<Staff>("Staff").AsQueryable();
             if (collection == null) { return NotFound(); }
             var ordered = collection.OrderBy(i => i.Role).ThenBy(i => i.LastName).ThenBy(i => i.FirstName);
-            return Ok(ordered);
+
+            var dtoData = ordered.Select(s => new StaffDto
+            {
+                Id = s.Id,
+                FirstName = s.FirstName,
+                LastName = s.LastName,
+                Username = s.Username,
+                Email = s.Email,
+                Role = s.Role,
+            }).ToList();
+
+            return Ok(dtoData);
         }
 
         /// <summary>
@@ -45,18 +57,31 @@ namespace BeanSceneOrderingAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            await client.GetDatabase(databaseName).GetCollection<Staff>("Staff").InsertOneAsync(staff);
+            // Hash password
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(staff.PasswordHash);
 
-            return CreatedAtAction(nameof(Get), new { id = staff.Id }, staff);
+            var hashedAccount = new Staff
+            {
+                FirstName = staff.FirstName,
+                LastName = staff.LastName,
+                Username = staff.Username,
+                Email = staff.Email,
+                PasswordHash = hashedPassword,
+                Role = staff.Role,
+            };
+
+            await client.GetDatabase(databaseName).GetCollection<Staff>("Staff").InsertOneAsync(hashedAccount);
+
+            return CreatedAtAction(nameof(Get), new { id = hashedAccount.Id }, hashedAccount);
         }
 
         /// <summary>
-        /// HTTP PUT method which updates an existing staff member.
+        /// HTTP PUT method which updates an existing staff member. Doesn't include password.
         /// </summary>
         /// <param name="item">Staff member to be updated. The id must match one in the collection.</param>
         /// <returns>NotFound(), Ok() or StatusCode(500)</returns>
         [HttpPut]
-        public async Task<IActionResult> Put(Staff staff)
+        public async Task<IActionResult> Put(StaffDto staff)
         {
             try
             {
@@ -72,7 +97,6 @@ namespace BeanSceneOrderingAPI.Controllers
                     .Set("lastname", staff.LastName)
                     .Set("username", staff.Username)
                     .Set("email", staff.Email)
-                    .Set("passwordhash", staff.PasswordHash)
                     .Set("role", staff.Role)
                     ;
 
@@ -93,6 +117,46 @@ namespace BeanSceneOrderingAPI.Controllers
                 return Ok("Staff updated");
             }
             catch (Exception e)
+            {
+                return StatusCode(500, $"Error updating staff: {e.Message}");
+            }
+        }
+
+        [HttpPut("{id}/UpdatePassword")]
+        public async Task<IActionResult> UpdatePassword(string id, [FromBody] string newPassword)
+        {
+            try
+            {
+                var filter = Builders<Staff>.Filter.Eq("_id", ObjectId.Parse(id));
+
+                if (filter == null)
+                {
+                    return NotFound(0);
+                }
+
+                // Hash password
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+                var update = Builders<Staff>.Update
+                    .Set("passwordhash", hashedPassword);
+
+                var result = await client.GetDatabase(databaseName)
+                    .GetCollection<Staff>("Staff")
+                    .UpdateOneAsync(filter, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    return NotFound("Staff not found");
+                }
+
+                if (result.ModifiedCount == 0)
+                {
+                    return Ok("Staff found but no changes were made");
+                }
+
+                return Ok("Staff password updated");
+
+            } catch (Exception e) 
             {
                 return StatusCode(500, $"Error updating staff: {e.Message}");
             }
