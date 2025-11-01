@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using BCrypt.Net;
+using System.Text.Json;
 
 namespace BeanSceneOrderingAPI.Controllers
 {
@@ -42,6 +43,49 @@ namespace BeanSceneOrderingAPI.Controllers
             }).ToList();
 
             return Ok(dtoData);
+        }
+
+        /// <summary>
+        /// HTTP POST method which returns a staff DTO if username & password match, or returns unauthorised if they don't.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        [HttpPost("Login")]
+        public IActionResult Login([FromBody] Dictionary<string, string> credentials)
+        {
+
+            if (!credentials.ContainsKey("username") || !credentials.ContainsKey("password"))
+            {
+                return BadRequest("Malformed body! It must have 'username' and 'password'!");
+            }
+
+            var filter = Builders<Staff>.Filter.Eq("username", credentials["username"]);
+            var account = client.GetDatabase(databaseName).GetCollection<Staff>("Staff").Find(filter).FirstOrDefault();
+            
+            if (account == null)
+            {
+                return Unauthorized("Invalid credentials.");
+            }
+
+            bool isValidPassword = BCrypt.Net.BCrypt.Verify(credentials["password"], account.PasswordHash);
+
+            if (!isValidPassword)
+            {
+                return Unauthorized("Invalid credentials.");
+            }
+
+            var dtoAccount = new StaffDto
+            {
+                Id = account.Id,
+                FirstName = account.FirstName,
+                LastName = account.LastName,
+                Username = account.Username,
+                Email = account.Email,
+                Role = account.Role,
+            };
+
+            return Ok(dtoAccount);
         }
 
         /// <summary>
