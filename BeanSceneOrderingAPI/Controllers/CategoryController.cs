@@ -1,4 +1,5 @@
 ﻿using BeanSceneOrderingAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -23,6 +24,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// HTTP GET method which returns all menu categories in the database.
         /// </summary>
         /// <returns>Ok(collection) or NotFound()</returns>
+        [Authorize]
         [HttpGet]
         public IActionResult Get()
         {
@@ -35,6 +37,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="item">Category to be inserted.</param>
         /// <returns>CreatedAtAction() or BadRequest()</returns>
+        [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Category category)
         {
@@ -53,6 +56,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="item">Category to be updated. The id must match one in the collection.</param>
         /// <returns>NotFound(), Ok() or StatusCode(500)</returns>
+        [Authorize(Roles = "Manager")]
         [HttpPut]
         public async Task<IActionResult> Put(Category category)
         {
@@ -95,6 +99,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="id">The id of the category to be deleted.</param>
         /// <returns>Ok() or NotFound()</returns>
+        [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {

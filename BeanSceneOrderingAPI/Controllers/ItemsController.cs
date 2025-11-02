@@ -1,4 +1,5 @@
 ﻿using BeanSceneOrderingAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -23,6 +24,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// HTTP GET method which returns all menu items in the database.
         /// </summary>
         /// <returns>Ok(collection) or NotFound()</returns>
+        [Authorize]
         [HttpGet]
         public IActionResult Get()
         {
@@ -37,6 +39,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="id">Id of a menu item.</param>
         /// <returns>Ok(item) or NotFound()</returns>
+        [Authorize]
         [HttpGet("{id}")]
         public IActionResult Get(string id)
         {
@@ -50,6 +53,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="item">Item to be inserted.</param>
         /// <returns>CreatedAtAction() or BadRequest()</returns>
+        [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Item item)
         {
@@ -68,6 +72,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="item">Item to be updated. The id must match one in the collection, the other fields are the new values.</param>
         /// <returns>NotFound(), Ok() or StatusCode(500)</returns>
+        [Authorize(Roles = "Manager")]
         [HttpPut]
         public async Task<IActionResult> Put(Item item)
         {
@@ -115,6 +120,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="id">The id of the item to be deleted.</param>
         /// <returns>Ok() or NotFound()</returns>
+        [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {

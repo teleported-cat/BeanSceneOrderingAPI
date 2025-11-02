@@ -5,6 +5,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using BCrypt.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BeanSceneOrderingAPI.Controllers
 {
@@ -25,6 +26,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// HTTP GET method which returns all staff members in the database.
         /// </summary>
         /// <returns>Ok(collection) or NotFound()</returns>
+        [Authorize(Roles = "Manager")]
         [HttpGet]
         public IActionResult Get()
         {
@@ -93,6 +95,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="item">Staff member to be inserted.</param>
         /// <returns>CreatedAtAction() or BadRequest()</returns>
+        [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Staff staff)
         {
@@ -124,6 +127,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="item">Staff member to be updated. The id must match one in the collection.</param>
         /// <returns>NotFound(), Ok() or StatusCode(500)</returns>
+        [Authorize(Roles = "Manager")]
         [HttpPut]
         public async Task<IActionResult> Put(StaffDto staff)
         {
@@ -166,6 +170,7 @@ namespace BeanSceneOrderingAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Manager")]
         [HttpPut("{id}/UpdatePassword")]
         public async Task<IActionResult> UpdatePassword(string id, [FromBody] string newPassword)
         {
@@ -211,6 +216,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// </summary>
         /// <param name="id">The id of the staff member to be deleted.</param>
         /// <returns>Ok() or NotFound()</returns>
+        [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
