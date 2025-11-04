@@ -23,7 +23,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP GET method which returns all menu items in the database.
         /// </summary>
-        /// <returns>Ok(collection) or NotFound()</returns>
+        /// <returns>OK (200) with list of items, or Not Found (404) if the collection isn't found.</returns>
         [Authorize]
         [HttpGet]
         public IActionResult Get()
@@ -35,24 +35,10 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         /// <summary>
-        /// HTTP GET method which returns a menu item that matches the given id.
-        /// </summary>
-        /// <param name="id">Id of a menu item.</param>
-        /// <returns>Ok(item) or NotFound()</returns>
-        [Authorize]
-        [HttpGet("{id}")]
-        public IActionResult Get(string id)
-        {
-            var collection = client.GetDatabase(databaseName).GetCollection<Item>("Items").AsQueryable();
-            var item = collection.First(i => i.Id == id);
-            return item == null ? NotFound() : Ok(item);
-        }
-
-        /// <summary>
         /// HTTP POST method which inserts a new item into the menu.
         /// </summary>
-        /// <param name="item">Item to be inserted.</param>
-        /// <returns>CreatedAtAction() or BadRequest()</returns>
+        /// <param name="item">Item data to be inserted</param>
+        /// <returns>Created At Action (201) if successful, or Bad Request (400) if item data is invalid.</returns>
         [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Item item)
@@ -70,8 +56,8 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP PUT method which updates an existing item.
         /// </summary>
-        /// <param name="item">Item to be updated. The id must match one in the collection, the other fields are the new values.</param>
-        /// <returns>NotFound(), Ok() or StatusCode(500)</returns>
+        /// <param name="item">Item to be updated</param>
+        /// <returns>OK (200) if successful, Not Found (404) if item isn't found, or Server Error (500) if an exception occurs.</returns>
         [Authorize(Roles = "Manager")]
         [HttpPut]
         public async Task<IActionResult> Put(Item item)
@@ -116,10 +102,10 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         /// <summary>
-        /// HTTP method which deletes an item from the collection.
+        /// HTTP DELETE method which deletes an item from the collection.
         /// </summary>
-        /// <param name="id">The id of the item to be deleted.</param>
-        /// <returns>Ok() or NotFound()</returns>
+        /// <param name="id">Id of the item to be deleted</param>
+        /// <returns>OK (200) if successful, or Not Found (404) if item isn't found.</returns>
         [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)

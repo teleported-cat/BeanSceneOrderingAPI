@@ -23,7 +23,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP GET method which returns all menu categories in the database.
         /// </summary>
-        /// <returns>Ok(collection) or NotFound()</returns>
+        /// <returns>OK (200) with list of categories or Not Found (404) if the collection isn't found.</returns>
         [Authorize]
         [HttpGet]
         public IActionResult Get()
@@ -35,8 +35,8 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP POST method which inserts a new category into the menu.
         /// </summary>
-        /// <param name="item">Category to be inserted.</param>
-        /// <returns>CreatedAtAction() or BadRequest()</returns>
+        /// <param name="item">Category data to be inserted</param>
+        /// <returns>Created At Action (201) if successful, or Bad Request (400) if category data is invalid.</returns>
         [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Category category)
@@ -52,53 +52,10 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         /// <summary>
-        /// HTTP PUT method which updates an existing category.
+        /// HTTP DELETE method which deletes a category from the collection.
         /// </summary>
-        /// <param name="item">Category to be updated. The id must match one in the collection.</param>
-        /// <returns>NotFound(), Ok() or StatusCode(500)</returns>
-        [Authorize(Roles = "Manager")]
-        [HttpPut]
-        public async Task<IActionResult> Put(Category category)
-        {
-            try
-            {
-                var filter = Builders<Category>.Filter.Eq("_id", ObjectId.Parse(category.Id));
-
-                if (filter == null)
-                {
-                    return NotFound(0);
-                }
-
-                var update = Builders<Category>.Update
-                    .Set("name", category.Name);
-
-                var result = await client.GetDatabase(databaseName)
-                    .GetCollection<Category>("Categories")
-                    .UpdateOneAsync(filter, update);
-
-                if (result.MatchedCount == 0)
-                {
-                    return NotFound("Category not found");
-                }
-
-                if (result.ModifiedCount == 0)
-                {
-                    return Ok("Category found but no changes were made");
-                }
-
-                return Ok("Category updated");
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, $"Error updating category: {e.Message}");
-            }
-        }
-
-        /// <summary>
-        /// HTTP method which deletes a category from the collection.
-        /// </summary>
-        /// <param name="id">The id of the category to be deleted.</param>
-        /// <returns>Ok() or NotFound()</returns>
+        /// <param name="id">Id of the category to be deleted</param>
+        /// <returns>OK (200) if successful, or Not Found (404) if category isn't found.</returns>
         [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)

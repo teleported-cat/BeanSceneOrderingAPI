@@ -21,9 +21,9 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         /// <summary>
-        /// HTTP GET method which returns all orders in the database.
+        /// HTTP GET method which returns all orders in the database ordered by its time & date.
         /// </summary>
-        /// <returns>Ok(collection) or NotFound()</returns>
+        /// <returns>OK (200) with list of orders, or Not Found (404) if the collection isn't found.</returns>
         [Authorize]
         [HttpGet]
         public IActionResult Get()
@@ -35,17 +35,10 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         /// <summary>
-        /// HTTP GET method which returns an order based on its id.
+        /// HTTP POST method which inserts a new order into the database.
         /// </summary>
-        /// <param name="id">Id of the order.</param>
-        /// <returns>Ok(order) or NotFound()</returns>
-        [Authorize]
-        [HttpGet("{id}")]
-        public IActionResult Get(string id)
-        {
-            return BadRequest();
-        }
-
+        /// <param name="order">The order data being inserted.</param>
+        /// <returns>Created At Action (201) if successful, or Bad Request (400) if order data is invalid.</returns>
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Order order)
@@ -62,9 +55,19 @@ namespace BeanSceneOrderingAPI.Controllers
             return CreatedAtAction(nameof(Get), new { id = order.Id }, order);
         }
 
+        /// <summary>
+        /// HTTP PUT method which updates the status of an order in the system.
+        /// </summary>
+        /// <param name="id">Id of the order</param>
+        /// <param name="newStatus">The new status of the order</param>
+        /// <returns>
+        /// OK (200) if updated successfully, 
+        /// Not Found (404) if order isn't found, 
+        /// or Server Error (500) if an exception occurs.
+        /// </returns>
         [Authorize]
         [HttpPut("{id}/Status")]
-        public async Task<IActionResult> Put(string id, [FromBody] string newStatus)
+        public async Task<IActionResult> UpdateStatus(string id, [FromBody] string newStatus)
         {
             try 
             { 
@@ -98,6 +101,11 @@ namespace BeanSceneOrderingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// HTTP GET method which returns all items in an order, including their quantities.
+        /// </summary>
+        /// <param name="id">Id of the order</param>
+        /// <returns>OK (200) with an list of items or Not Found (404) if order isn't found.</returns>
         [Authorize]
         [HttpGet("{id}/Items")]
         public async Task<IActionResult> GetItems(string id)

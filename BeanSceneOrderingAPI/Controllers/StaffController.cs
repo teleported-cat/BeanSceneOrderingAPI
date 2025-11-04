@@ -25,7 +25,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP GET method which returns all staff members in the database.
         /// </summary>
-        /// <returns>Ok(collection) or NotFound()</returns>
+        /// <returns>OK (200) with list of staff, or Not Found (404) if the collection isn't found.</returns>
         [Authorize(Roles = "Manager")]
         [HttpGet]
         public IActionResult Get()
@@ -48,11 +48,14 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         /// <summary>
-        /// HTTP POST method which returns a staff DTO if username & password match, or returns unauthorised if they don't.
+        /// HTTP POST method used to authenticate & authorise users with staff accounts.
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
+        /// <param name="credentials">JSON object containing 'username' & 'password' properties.</param>
+        /// <returns>
+        /// OK (200) with account details including role, 
+        /// Bad Request (400) if the credentials are malformed, 
+        /// or Unauthorized (401) if the user isn't found or credentials are invalid,
+        /// </returns>
         [HttpPost("Login")]
         public IActionResult Login([FromBody] Dictionary<string, string> credentials)
         {
@@ -93,8 +96,8 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP POST method which inserts a new staff member.
         /// </summary>
-        /// <param name="item">Staff member to be inserted.</param>
-        /// <returns>CreatedAtAction() or BadRequest()</returns>
+        /// <param name="item">Staff data to be inserted</param>
+        /// <returns>Created At Action (201) if successful, or Bad Request (400) if staff data is invalid.</returns>
         [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Staff staff)
@@ -125,8 +128,8 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP PUT method which updates an existing staff member. Doesn't include password.
         /// </summary>
-        /// <param name="item">Staff member to be updated. The id must match one in the collection.</param>
-        /// <returns>NotFound(), Ok() or StatusCode(500)</returns>
+        /// <param name="item">Staff member to be updated</param>
+        /// <returns>OK (200) if successful, Not Found (404) if staff isn't found, or Server Error (500) if an exception occurs.</returns>
         [Authorize(Roles = "Manager")]
         [HttpPut]
         public async Task<IActionResult> Put(StaffDto staff)
@@ -170,6 +173,12 @@ namespace BeanSceneOrderingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// HTTP PUT method which updates the password for a staff account.
+        /// </summary>
+        /// <param name="id">Id of the staff account</param>
+        /// <param name="newPassword">The new password for the account</param>
+        /// <returns>OK (200) if successful, Not Found (404) if staff isn't found, or Server Error (500) if an exception occurs.</returns>
         [Authorize(Roles = "Manager")]
         [HttpPut("{id}/UpdatePassword")]
         public async Task<IActionResult> UpdatePassword(string id, [FromBody] string newPassword)
@@ -212,10 +221,10 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         /// <summary>
-        /// HTTP method which deletes a staff member from the collection.
+        /// HTTP DELETE method which deletes a staff member from the collection.
         /// </summary>
-        /// <param name="id">The id of the staff member to be deleted.</param>
-        /// <returns>Ok() or NotFound()</returns>
+        /// <param name="id">Id of the staff member to be deleted</param>
+        /// <returns>OK if successful (200), or Not Found (404) if staff isn't found.</returns>
         [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
