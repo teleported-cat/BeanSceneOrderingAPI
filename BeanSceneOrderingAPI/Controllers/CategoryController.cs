@@ -55,7 +55,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// HTTP DELETE method which deletes a category from the collection.
         /// </summary>
         /// <param name="id">Id of the category to be deleted</param>
-        /// <returns>OK (200) if successful, or Not Found (404) if category isn't found.</returns>
+        /// <returns>OK (200) if a category is deleted or not.</returns>
         [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
