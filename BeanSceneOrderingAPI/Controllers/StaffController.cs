@@ -224,7 +224,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// HTTP DELETE method which deletes a staff member from the collection.
         /// </summary>
         /// <param name="id">Id of the staff member to be deleted</param>
-        /// <returns>OK if successful (200), or Not Found (404) if staff isn't found.</returns>
+        /// <returns>OK (200) if an item is deleted or not.</returns>
         [Authorize(Roles = "Manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
