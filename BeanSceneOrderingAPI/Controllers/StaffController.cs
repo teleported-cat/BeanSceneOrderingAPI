@@ -22,7 +22,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// Constructor for the Staff Controller.
         /// </summary>
-        /// <param name="databaseSettings">The settings the database, including name & connection string</param>
+        /// <param name="databaseSettings">The settings the database, including name and connection string</param>
         public StaffController(IOptions<BeanSceneDatabaseSettings> databaseSettings)
         {
             databaseName = databaseSettings.Value.DatabaseName;
@@ -55,9 +55,9 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         /// <summary>
-        /// HTTP POST method used to authenticate & authorise users with staff accounts.
+        /// HTTP POST method used to authenticate and authorise users with staff accounts.
         /// </summary>
-        /// <param name="credentials">JSON object containing 'username' & 'password' properties.</param>
+        /// <param name="credentials">JSON object containing 'username' and 'password' properties.</param>
         /// <returns>
         /// OK (200) with account details including role, 
         /// Bad Request (400) if the credentials are malformed, 
@@ -103,7 +103,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP POST method which inserts a new staff member.
         /// </summary>
-        /// <param name="item">Staff data to be inserted</param>
+        /// <param name="staff">Staff data to be inserted</param>
         /// <returns>Created At Action (201) if successful, or Bad Request (400) if staff data is invalid.</returns>
         [Authorize(Roles = "Manager")]
         [HttpPost]
@@ -135,7 +135,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP PUT method which updates an existing staff member. Doesn't include password.
         /// </summary>
-        /// <param name="item">Staff member to be updated</param>
+        /// <param name="staff">Staff member to be updated</param>
         /// <returns>OK (200) if successful, Not Found (404) if staff isn't found, or Server Error (500) if an exception occurs.</returns>
         [Authorize(Roles = "Manager")]
         [HttpPut]

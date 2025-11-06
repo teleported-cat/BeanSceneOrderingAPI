@@ -20,7 +20,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// Constructor for the Items Controller.
         /// </summary>
-        /// <param name="databaseSettings">The settings the database, including name & connection string</param>
+        /// <param name="databaseSettings">The settings the database, including name and connection string</param>
         public ItemsController(IOptions<BeanSceneDatabaseSettings> databaseSettings)
         {
             databaseName = databaseSettings.Value.DatabaseName;

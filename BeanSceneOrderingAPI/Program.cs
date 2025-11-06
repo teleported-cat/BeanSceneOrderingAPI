@@ -5,8 +5,15 @@ using Microsoft.OpenApi.Models;
 
 namespace BeanSceneOrderingAPI
 {
+    /// <summary>
+    /// Class of the API's entry point.
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// The API's entry point.
+        /// </summary>
+        /// <param name="args">Unused. This program doesn't take any arguments.</param>
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);

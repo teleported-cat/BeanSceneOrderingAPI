@@ -20,7 +20,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// Constructor for the Orders Controller.
         /// </summary>
-        /// <param name="databaseSettings">The settings the database, including name & connection string</param>
+        /// <param name="databaseSettings">The settings the database, including name and connection string</param>
         public OrdersController(IOptions<BeanSceneDatabaseSettings> databaseSettings)
         {
             databaseName = databaseSettings.Value.DatabaseName;
@@ -28,7 +28,7 @@ namespace BeanSceneOrderingAPI.Controllers
         }
 
         /// <summary>
-        /// HTTP GET method which returns all orders in the database ordered by its time & date.
+        /// HTTP GET method which returns all orders in the database ordered by its time and date.
         /// </summary>
         /// <returns>OK (200) with list of orders, or Not Found (404) if the collection isn't found.</returns>
         [Authorize]

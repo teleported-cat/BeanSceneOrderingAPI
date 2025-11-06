@@ -20,7 +20,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// Constructor for the Category Controller.
         /// </summary>
-        /// <param name="databaseSettings">The settings the database, including name & connection string</param>
+        /// <param name="databaseSettings">The settings the database, including name and connection string</param>
         public CategoryController(IOptions<BeanSceneDatabaseSettings> databaseSettings)
         {
             databaseName = databaseSettings.Value.DatabaseName;
@@ -42,7 +42,7 @@ namespace BeanSceneOrderingAPI.Controllers
         /// <summary>
         /// HTTP POST method which inserts a new category into the menu.
         /// </summary>
-        /// <param name="item">Category data to be inserted</param>
+        /// <param name="category">Category data to be inserted</param>
         /// <returns>Created At Action (201) if successful, or Bad Request (400) if category data is invalid.</returns>
         [Authorize(Roles = "Manager")]
         [HttpPost]

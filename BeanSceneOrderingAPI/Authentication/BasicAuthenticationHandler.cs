@@ -10,10 +10,20 @@ using System.Text.Encodings.Web;
 
 namespace BeanSceneOrderingAPI.Authentication
 {
+    /// <summary>
+    /// Class for initalising authorisation attributes in controllers to use basic authentication.
+    /// </summary>
     public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         private readonly IMongoCollection<Staff> _staffCollection;
 
+        /// <summary>
+        /// Constructor for the authentication handler.
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="databaseSettings"></param>
+        /// <param name="logger"></param>
+        /// <param name="encoder"></param>
         public BasicAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             IOptions<BeanSceneDatabaseSettings> databaseSettings,
@@ -26,6 +36,14 @@ namespace BeanSceneOrderingAPI.Authentication
             _staffCollection = database.GetCollection<Staff>("Staff");
         }
 
+        /// <summary>
+        /// Enforces 'authorization' header on authorised methods, validates credentials, and determines if the user has sufficient access.
+        /// </summary>
+        /// <returns>
+        /// The result of the authentication; 
+        /// fails if the header is missing in request, if the credentials are invalid or doesn't have the correct role,
+        /// and succeeds otherwise.
+        /// </returns>
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             // Check if auth header exists
