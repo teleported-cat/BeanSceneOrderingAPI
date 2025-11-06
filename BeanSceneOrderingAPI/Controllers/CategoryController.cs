@@ -7,6 +7,9 @@ using MongoDB.Driver;
 
 namespace BeanSceneOrderingAPI.Controllers
 {
+    /// <summary>
+    /// Controller for API endpoints related to the menu category collection in the database.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class CategoryController : ControllerBase
@@ -14,6 +17,10 @@ namespace BeanSceneOrderingAPI.Controllers
         MongoClient client;
         string databaseName;
 
+        /// <summary>
+        /// Constructor for the Category Controller.
+        /// </summary>
+        /// <param name="databaseSettings">The settings the database, including name & connection string</param>
         public CategoryController(IOptions<BeanSceneDatabaseSettings> databaseSettings)
         {
             databaseName = databaseSettings.Value.DatabaseName;

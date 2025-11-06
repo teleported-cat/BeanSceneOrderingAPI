@@ -7,6 +7,9 @@ using MongoDB.Driver;
 
 namespace BeanSceneOrderingAPI.Controllers
 {
+    /// <summary>
+    /// Controller for API endpoints related to the order collection in the database.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class OrdersController : ControllerBase
@@ -14,6 +17,10 @@ namespace BeanSceneOrderingAPI.Controllers
         MongoClient client;
         string databaseName;
 
+        /// <summary>
+        /// Constructor for the Orders Controller.
+        /// </summary>
+        /// <param name="databaseSettings">The settings the database, including name & connection string</param>
         public OrdersController(IOptions<BeanSceneDatabaseSettings> databaseSettings)
         {
             databaseName = databaseSettings.Value.DatabaseName;

@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace BeanSceneOrderingAPI.Controllers
 {
+    /// <summary>
+    /// Controller for API endpoints related to the staff collection in the database.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class StaffController : ControllerBase
@@ -16,6 +19,10 @@ namespace BeanSceneOrderingAPI.Controllers
         MongoClient client;
         string databaseName;
 
+        /// <summary>
+        /// Constructor for the Staff Controller.
+        /// </summary>
+        /// <param name="databaseSettings">The settings the database, including name & connection string</param>
         public StaffController(IOptions<BeanSceneDatabaseSettings> databaseSettings)
         {
             databaseName = databaseSettings.Value.DatabaseName;
